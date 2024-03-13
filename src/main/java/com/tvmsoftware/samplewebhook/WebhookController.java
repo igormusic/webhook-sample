@@ -1,5 +1,6 @@
 package com.tvmsoftware.samplewebhook;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @RestController
+@Slf4j
 public class WebhookController {
 
 // get secret from config file
@@ -31,10 +33,10 @@ public class WebhookController {
 
         if (isValidSignature(signature, payload)) {
             // Process the payload as needed
-            System.out.println("Valid signature. Payload: " + payload);
+            log.info("Valid signature. Payload: " + payload);
             return ResponseEntity.ok().body("Webhook received successfully.");
         } else {
-            System.err.println("Invalid signature. Payload: " + payload);
+            log.error("Invalid signature. Payload: " + payload + " signature provided: " + signature);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid signature.");
         }
 
@@ -53,7 +55,7 @@ public class WebhookController {
             byte[] digest = mac.doFinal(data.getBytes());
             return bytesToHex(digest);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            e.printStackTrace();
+            log.error("failed to calculate HMAC", e);
             return null;
         }
     }
