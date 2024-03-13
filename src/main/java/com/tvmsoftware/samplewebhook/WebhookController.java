@@ -1,5 +1,6 @@
 package com.tvmsoftware.samplewebhook;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,12 @@ public class WebhookController {
 
 // get secret from config file
 
-    private final String secret = "your_webhook_secret";
+    private final String secretValue;
+
+    public WebhookController(@Value("${secret}") String secretValue) {
+        this.secretValue = secretValue;
+    }
+
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestHeader("Signature") String signature,
@@ -35,7 +41,7 @@ public class WebhookController {
     }
 
     private boolean isValidSignature(String signature, String payload) {
-        String computedSignature = "sha1=" + calculateHMAC(payload, secret);
+        String computedSignature = "sha1=" + calculateHMAC(payload, secretValue);
         return computedSignature.equals(signature);
     }
 
